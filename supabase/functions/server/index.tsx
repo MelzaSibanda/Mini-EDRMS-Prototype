@@ -40,19 +40,17 @@ const kv = {
 };
 
 /**
- * EDRMS Backend Server - Hono Web Server
+ * EDMS Backend Server - Hono Web Server
  * 
  * This server handles all backend operations for the Electronic Document and Records Management System.
  * Architecture: Frontend -> Server -> Database (KV Store)
  * 
- * Database Structure (Simulated Relational Model using KV Store):
+ * Database Structure (Record Reference Model using KV Store):
  * - Departments: dept:{id} -> { id, name }
  * - DocumentTypes: doctype:{id} -> { id, name }
  * - Documents: doc:{id} -> { id, title, typeId, deptId, dateCreated, status, ownerName }
  * - Users: user:{id} -> { id, name }
  * 
- * This design demonstrates relational database concepts using foreign keys (typeId, deptId)
- * which you can explain in your interview as showing proper normalization and data relationships.
  */
 
 const app = new Hono();
@@ -74,7 +72,6 @@ app.use(
 
 /**
  * Initialize Database with Seed Data
- * This function sets up the initial data for demonstration purposes
  * It runs idempotently (safe to run multiple times)
  */
 async function initializeDatabase() {
@@ -86,9 +83,7 @@ async function initializeDatabase() {
       return;
     }
 
-    console.log("Initializing EDRMS database with seed data...");
-
-    // Seed Departments - demonstrates lookup/reference tables
+    console.log("Initializing EDMS database with seed data...");
     const departments = [
       { id: "1", name: "HR" },
       { id: "2", name: "Finance" },
@@ -99,8 +94,6 @@ async function initializeDatabase() {
     for (const dept of departments) {
       await kv.set(`dept:${dept.id}`, JSON.stringify(dept));
     }
-
-    // Seed Document Types - demonstrates enumeration/classification
     const documentTypes = [
       { id: "1", name: "Policy" },
       { id: "2", name: "Contract" },
@@ -111,71 +104,69 @@ async function initializeDatabase() {
     for (const type of documentTypes) {
       await kv.set(`doctype:${type.id}`, JSON.stringify(type));
     }
-
-    // Seed Sample Documents - demonstrates main entity with foreign key relationships
-    const sampleDocuments = [
+    const evaluationRecords = [
       {
         id: "1",
-        title: "Employee Handbook 2026",
+        title: "Fictional HR Policy Review – 2026",
         typeId: "1", // Foreign key to Document Types (Policy)
         deptId: "1", // Foreign key to Departments (HR)
         dateCreated: "2026-01-15",
         status: "Approved",
-        ownerName: "Sarah Johnson",
+        ownerName: "Fictional HR Officer",
       },
       {
         id: "2",
-        title: "Q4 2025 Financial Report",
+        title: "Fictional Finance Quarterly Review",
         typeId: "4", // Evaluation Report
         deptId: "2", // Finance
         dateCreated: "2026-01-20",
         status: "Approved",
-        ownerName: "Michael Chen",
+        ownerName: "Fictional Finance Officer",
       },
       {
         id: "3",
-        title: "Software License Agreement",
+        title: "Fictional Supplier Service Agreement",
         typeId: "2", // Contract
         deptId: "3", // IT
         dateCreated: "2026-02-01",
         status: "Submitted",
-        ownerName: "David Kumar",
+        ownerName: "Fictional IT Officer",
       },
       {
         id: "4",
-        title: "Office Supplies Invoice - January",
+        title: "Fictional Regional Office Correspondence",
         typeId: "3", // Invoice
         deptId: "4", // Operations
         dateCreated: "2026-02-05",
         status: "Approved",
-        ownerName: "Emma Williams",
+        ownerName: "Fictional Regional Officer",
       },
       {
         id: "5",
-        title: "Remote Work Policy Draft",
+        title: "Fictional HR Policy Amendment",
         typeId: "1", // Policy
         deptId: "1", // HR
         dateCreated: "2026-02-10",
         status: "Draft",
-        ownerName: "Sarah Johnson",
+        ownerName: "Fictional HR Officer",
       },
       {
         id: "6",
-        title: "Network Security Assessment",
+        title: "Fictional Information Governance Assessment",
         typeId: "4", // Evaluation Report
         deptId: "3", // IT
         dateCreated: "2026-02-11",
         status: "Submitted",
-        ownerName: "David Kumar",
+        ownerName: "Fictional IT Officer",
       },
     ];
 
-    for (const doc of sampleDocuments) {
+    for (const doc of evaluationRecords) {
       await kv.set(`doc:${doc.id}`, JSON.stringify(doc));
     }
 
     // Keep track of all document IDs for efficient retrieval
-    await kv.set("doc:ids", JSON.stringify(sampleDocuments.map(d => d.id)));
+    await kv.set("doc:ids", JSON.stringify(evaluationRecords.map(d => d.id)));
 
     // Mark as initialized
     await kv.set("edrms:initialized", "true");
@@ -224,16 +215,14 @@ app.get("/departments", async (c) => {
 /**
  * GET /users
  * Retrieves all users
- * Mock implementation for demonstration
  */
 app.get("/users", async (c) => {
   try {
-    // Mock users data
     const users = [
-      { id: "1", name: "Sarah Johnson", email: "sarah.johnson@company.com", department_id: "1" },
-      { id: "2", name: "Michael Chen", email: "michael.chen@company.com", department_id: "2" },
-      { id: "3", name: "David Kumar", email: "david.kumar@company.com", department_id: "3" },
-      { id: "4", name: "Emma Williams", email: "emma.williams@company.com", department_id: "4" },
+      { id: "1", name: "Fictional HR Officer", email: "hr-officer@example.invalid", department_id: "1" },
+      { id: "2", name: "Fictional Finance Officer", email: "finance-officer@example.invalid", department_id: "2" },
+      { id: "3", name: "Fictional IT Officer", email: "it-officer@example.invalid", department_id: "3" },
+      { id: "4", name: "Fictional Regional Officer", email: "regional-officer@example.invalid", department_id: "4" },
     ];
 
     return c.json(users);
@@ -248,7 +237,6 @@ app.get("/users", async (c) => {
 /**
  * GET /document-types
  * Retrieves all document types
- * Demonstrates reference data retrieval
  */
 app.get("/document-types", async (c) => {
   try {
@@ -274,7 +262,6 @@ app.get("/document-types", async (c) => {
  * Retrieves all documents with optional filtering
  * Query params: department_id, status
  *
- * This demonstrates:
  * - Data retrieval with filtering
  * - JOIN-like operations (resolving foreign keys to get related data)
  */
@@ -298,8 +285,6 @@ app.get("/documents", async (c) => {
         // Apply filters if provided
         if (deptFilter && doc.deptId !== deptFilter) continue;
         if (statusFilter && doc.status !== statusFilter) continue;
-
-        // Resolve foreign keys - demonstrating JOIN operations
         const deptJson = await kv.get(`dept:${doc.deptId}`);
         const typeJson = await kv.get(`doctype:${doc.typeId}`);
 
@@ -309,13 +294,13 @@ app.get("/documents", async (c) => {
           title: doc.title,
           document_type_id: doc.typeId,
           department_id: doc.deptId,
-          owner_id: "1", // Mock owner ID
+          owner_id: "1", // Evaluation owner ID
           status: doc.status,
           date_created: doc.dateCreated,
           description: doc.title, // Use title as description
           department: deptJson ? JSON.parse(deptJson) : undefined,
           document_type: typeJson ? JSON.parse(typeJson) : undefined,
-          owner: { id: "1", name: doc.ownerName, email: `${doc.ownerName.toLowerCase().replace(' ', '.')}@company.com`, department_id: doc.deptId }
+          owner: { id: "1", name: doc.ownerName, email: `${doc.ownerName.toLowerCase().replace(' ', '.')}@example.invalid`, department_id: doc.deptId }
         });
       }
     }
@@ -330,7 +315,6 @@ app.get("/documents", async (c) => {
 /**
  * GET /documents/:id
  * Retrieves a single document by ID with all related data
- * Demonstrates detail view with foreign key resolution
  */
 app.get("/documents/:id", async (c) => {
   try {
@@ -358,7 +342,7 @@ app.get("/documents/:id", async (c) => {
       description: doc.title,
       department: deptJson ? JSON.parse(deptJson) : undefined,
       document_type: typeJson ? JSON.parse(typeJson) : undefined,
-      owner: { id: "1", name: doc.ownerName, email: `${doc.ownerName.toLowerCase().replace(' ', '.')}@company.com`, department_id: doc.deptId }
+      owner: { id: "1", name: doc.ownerName, email: `${doc.ownerName.toLowerCase().replace(' ', '.')}@example.invalid`, department_id: doc.deptId }
     };
 
     return c.json(fullDocument);
@@ -371,7 +355,6 @@ app.get("/documents/:id", async (c) => {
 /**
  * POST /documents
  * Creates a new document record
- * Demonstrates INSERT operation with foreign key validation
  */
 app.post("/documents", async (c) => {
   try {
@@ -406,7 +389,7 @@ app.post("/documents", async (c) => {
       deptId: body.department_id,
       dateCreated: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
       status: body.status,
-      ownerName: "Test User", // Mock for now
+      ownerName: "Fictional Records Officer", // Fictional evaluation identity
     };
 
     // Save to database
@@ -431,7 +414,7 @@ app.post("/documents", async (c) => {
       description: body.description || newDocument.title,
       department: deptJson ? JSON.parse(deptJson) : undefined,
       document_type: typeJson ? JSON.parse(typeJson) : undefined,
-      owner: { id: "1", name: newDocument.ownerName, email: `${newDocument.ownerName.toLowerCase().replace(' ', '.')}@company.com`, department_id: newDocument.deptId }
+      owner: { id: "1", name: newDocument.ownerName, email: `${newDocument.ownerName.toLowerCase().replace(' ', '.')}@example.invalid`, department_id: newDocument.deptId }
     };
 
     return c.json(fullDocument, 201);
@@ -439,7 +422,6 @@ app.post("/documents", async (c) => {
 /**
  * PUT /documents/:id
  * Updates an existing document
- * Demonstrates UPDATE operation
  */
 app.put("/documents/:id", async (c) => {
   try {
@@ -494,7 +476,7 @@ app.put("/documents/:id", async (c) => {
       description: body.description || updatedDoc.title,
       department: deptJson ? JSON.parse(deptJson) : undefined,
       document_type: typeJson ? JSON.parse(typeJson) : undefined,
-      owner: { id: "1", name: updatedDoc.ownerName, email: `${updatedDoc.ownerName.toLowerCase().replace(' ', '.')}@company.com`, department_id: updatedDoc.deptId }
+      owner: { id: "1", name: updatedDoc.ownerName, email: `${updatedDoc.ownerName.toLowerCase().replace(' ', '.')}@example.invalid`, department_id: updatedDoc.deptId }
     };
 
     return c.json(fullDocument);
@@ -507,7 +489,6 @@ app.put("/documents/:id", async (c) => {
 /**
  * DELETE /documents/:id
  * Deletes a document
- * Demonstrates DELETE operation
  */
 app.delete("/documents/:id", async (c) => {
   try {
@@ -543,7 +524,6 @@ app.delete("/documents/:id", async (c) => {
 /**
  * GET /statistics
  * Retrieves dashboard statistics
- * Demonstrates aggregate queries (COUNT, GROUP BY)
  */
 app.get("/statistics", async (c) => {
   try {

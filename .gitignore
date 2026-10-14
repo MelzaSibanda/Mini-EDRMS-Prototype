@@ -1,1 +1,5 @@
 node_modules
+
+.qa/
+public/ocr/
+public/pdf/

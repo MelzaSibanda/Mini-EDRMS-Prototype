@@ -3,7 +3,7 @@ import { cors } from "npm:hono/cors";
 
 const app = new Hono();
 
-// Enable CORS for all routes - allow all origins for demo
+// Enable CORS for all routes - integration CORS configuration
 app.use(
   "/*",
   cors({
@@ -15,12 +15,10 @@ app.use(
   }),
 );
 
-// Skip auth for demo purposes
+// Identity integration is required before operational use
 app.use("/*", async (c, next) => {
   await next();
 });
-
-// Mock data
 const departments = [
   { id: "1", name: "HR" },
   { id: "2", name: "Finance" },
@@ -36,96 +34,96 @@ const documentTypes = [
 ];
 
 const users = [
-  { id: "1", name: "Sarah Johnson", email: "sarah.johnson@company.com", department_id: "1" },
-  { id: "2", name: "Michael Chen", email: "michael.chen@company.com", department_id: "2" },
-  { id: "3", name: "David Kumar", email: "david.kumar@company.com", department_id: "3" },
-  { id: "4", name: "Emma Williams", email: "emma.williams@company.com", department_id: "4" },
+  { id: "1", name: "Fictional HR Officer", email: "hr-officer@example.invalid", department_id: "1" },
+  { id: "2", name: "Fictional Finance Officer", email: "finance-officer@example.invalid", department_id: "2" },
+  { id: "3", name: "Fictional IT Officer", email: "it-officer@example.invalid", department_id: "3" },
+  { id: "4", name: "Fictional Regional Officer", email: "regional-officer@example.invalid", department_id: "4" },
 ];
 
 let documents = [
   {
     id: "1",
-    title: "Employee Handbook 2026",
+    title: "Fictional HR Policy Review – 2026",
     document_type_id: "1",
     department_id: "1",
     owner_id: "1",
     status: "Approved",
     date_created: "2026-01-15",
-    description: "Employee Handbook 2026",
+    description: "Fictional HR Policy Review – 2026",
     department: { id: "1", name: "HR" },
     document_type: { id: "1", name: "Policy" },
-    owner: { id: "1", name: "Sarah Johnson", email: "sarah.johnson@company.com", department_id: "1" }
+    owner: { id: "1", name: "Fictional HR Officer", email: "hr-officer@example.invalid", department_id: "1" }
   },
   {
     id: "2",
-    title: "Q4 2025 Financial Report",
+    title: "Fictional Finance Quarterly Review",
     document_type_id: "4",
     department_id: "2",
     owner_id: "2",
     status: "Approved",
     date_created: "2026-01-20",
-    description: "Q4 2025 Financial Report",
+    description: "Fictional Finance Quarterly Review",
     department: { id: "2", name: "Finance" },
     document_type: { id: "4", name: "Evaluation Report" },
-    owner: { id: "2", name: "Michael Chen", email: "michael.chen@company.com", department_id: "2" }
+    owner: { id: "2", name: "Fictional Finance Officer", email: "finance-officer@example.invalid", department_id: "2" }
   },
   {
     id: "3",
-    title: "Software License Agreement",
+    title: "Fictional Supplier Service Agreement",
     document_type_id: "2",
     department_id: "3",
     owner_id: "3",
     status: "Submitted",
     date_created: "2026-02-01",
-    description: "Software License Agreement",
+    description: "Fictional Supplier Service Agreement",
     department: { id: "3", name: "IT" },
     document_type: { id: "2", name: "Contract" },
-    owner: { id: "3", name: "David Kumar", email: "david.kumar@company.com", department_id: "3" }
+    owner: { id: "3", name: "Fictional IT Officer", email: "it-officer@example.invalid", department_id: "3" }
   },
   {
     id: "4",
-    title: "Office Supplies Invoice - January",
+    title: "Fictional Regional Office Correspondence",
     document_type_id: "3",
     department_id: "4",
     owner_id: "4",
     status: "Approved",
     date_created: "2026-02-05",
-    description: "Office Supplies Invoice - January",
+    description: "Fictional Regional Office Correspondence",
     department: { id: "4", name: "Operations" },
     document_type: { id: "3", name: "Invoice" },
-    owner: { id: "4", name: "Emma Williams", email: "emma.williams@company.com", department_id: "4" }
+    owner: { id: "4", name: "Fictional Regional Officer", email: "regional-officer@example.invalid", department_id: "4" }
   },
   {
     id: "5",
-    title: "Remote Work Policy Draft",
+    title: "Fictional HR Policy Amendment",
     document_type_id: "1",
     department_id: "1",
     owner_id: "1",
     status: "Draft",
     date_created: "2026-02-10",
-    description: "Remote Work Policy Draft",
+    description: "Fictional HR Policy Amendment",
     department: { id: "1", name: "HR" },
     document_type: { id: "1", name: "Policy" },
-    owner: { id: "1", name: "Sarah Johnson", email: "sarah.johnson@company.com", department_id: "1" }
+    owner: { id: "1", name: "Fictional HR Officer", email: "hr-officer@example.invalid", department_id: "1" }
   },
   {
     id: "6",
-    title: "Network Security Assessment",
+    title: "Fictional Information Governance Assessment",
     document_type_id: "4",
     department_id: "3",
     owner_id: "3",
     status: "Submitted",
     date_created: "2026-02-11",
-    description: "Network Security Assessment",
+    description: "Fictional Information Governance Assessment",
     department: { id: "3", name: "IT" },
     document_type: { id: "4", name: "Evaluation Report" },
-    owner: { id: "3", name: "David Kumar", email: "david.kumar@company.com", department_id: "3" }
+    owner: { id: "3", name: "Fictional IT Officer", email: "it-officer@example.invalid", department_id: "3" }
   },
 ];
 
 // Test route
 app.get("/", (c) => {
-  return c.json({ message: "EDRMS API is running", status: "ok" });
+  return c.json({ message: "EDMS API is running", status: "ok" });
 });
 
 // Routes

@@ -5,7 +5,7 @@ export default async (req: Request) => {
 
   if (path === '/' || path === '') {
     return new Response(JSON.stringify({
-      message: "EDRMS API is running",
+      message: "EDMS API is running",
       status: "ok",
       path: path
     }), {

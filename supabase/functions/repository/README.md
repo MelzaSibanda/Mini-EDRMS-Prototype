@@ -1,0 +1,16 @@
+# Supabase repository integration — deployment work remains
+
+The migration and Edge function are source artifacts for review. They have not been applied, deployed or database-tested and the UI does not call them. Do not enable operational uploads until the following validation is complete.
+
+1. Use an isolated Supabase project and review the migration. It adds dedicated repository tables and a new private bucket; it does not alter legacy KV records. Its restrictive bucket policy is intended to prevent unrelated broad storage policies from granting repository access.
+2. Provision approved organisational identities through Supabase Auth/SSO. Populate repository_profiles through a trusted administrative service. Permissions come from this table, not client-supplied role claims. A technical administrator should have management permissions without view/download.
+3. Populate repository_settings.config with approved departments, documentTypes, requiredFields and disabled-by-default archive/removal rules. No organisational taxonomy approval is inferred from local evaluation values.
+4. Deploy the repository Edge function with SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY and REPOSITORY_ALLOWED_ORIGIN. The service-role key stays exclusively on the server. Keep the verified actor's RLS client separate from the storage broker's privileged client.
+5. Test POST /repository/upload with multipart file, metadata JSON and change description. Optional documentId and major select a new version. File validation is shared with the local application through the Deno import map. Failed upload compensation removes only the newly generated object and version manifest; a failed initial document is tombstoned for investigation.
+6. Test GET /repository/documents and GET /repository/documents/{documentId}/versions/{versionId}/file?mode=download or preview. Predictable UUID/path knowledge must not grant access. Access logging must succeed before the broker returns file bytes.
+7. Test PATCH metadata, concurrent version conflicts, CORS, invalid credentials, expired sessions, missing profiles, department/classification boundaries, byte-signature mismatches, oversized files and storage/audit failures. Ordinary clients must not be able to alter audit entries or access private binaries directly.
+8. Implement the frontend's persistent adapter and identity integration, administrative configuration/provisioning endpoints, server archive/removal routes, malware scanning and backup/recovery. Never upload local fictional fixtures to organisational storage automatically.
+
+The file broker uses server-side byte validation but does not provide antivirus scanning. Schema triggers and RLS are source implementations, not evidence that deployment is secure. Their database behavior needs verification in the intended Supabase environment. No permanent destruction process is provided.
+
+Reference design follows [Supabase RLS documentation](https://supabase.com/docs/guides/database/postgres/row-level-security) and [Storage access controls](https://supabase.com/docs/guides/storage/security/access-control).
