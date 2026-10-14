@@ -1,0 +1,20 @@
+# Render Static Site: frontend evaluation app, not a backend service.
+services:
+  - type: web
+    runtime: static
+    name: edms-document-repository
+    repo: https://github.com/MelzaSibanda/Mini-EDRMS-Prototype
+    branch: master
+    buildCommand: npm ci --include=dev --no-audit && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

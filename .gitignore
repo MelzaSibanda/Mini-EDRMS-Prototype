@@ -3,3 +3,8 @@ node_modules
 .qa/
 public/ocr/
 public/pdf/
+
+dist/
+.env
+.env.*
+!.env.example

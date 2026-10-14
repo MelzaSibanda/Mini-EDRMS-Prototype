@@ -38,3 +38,6 @@ A reviewable Supabase migration and authenticated file-broker source are provide
 These sources are **not deployed, database-tested or connected to the frontend**. Organisational authentication, approved profile provisioning/taxonomies, live migration, malware scanning, backup/recovery, administrative configuration APIs, backend archival/removal integration and durable repository connectivity remain required. The package installer reports unresolved dependency advisories; an additional audit was declined. Browser-worker and responsive end-to-end checks need an interactive browser.
 
 See [Architecture](SYSTEM_ARCHITECTURE.md), [Stakeholder guide](STAKEHOLDER_GUIDE.md), [Storage integration](supabase/functions/repository/README.md) and [Evaluation checklist](EVALUATION_CHECKLIST.md).
+## Render hosting
+
+The root [render.yaml](render.yaml) configures a Render Static Site with SPA routing and locally bundled OCR/PDF assets. See [Render deployment](RENDER_DEPLOYMENT.md) for Blueprint/manual setup and hosted verification. Hosting preserves the evaluation application's browser-storage and authentication limitations.
